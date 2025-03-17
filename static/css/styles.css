@@ -196,4 +196,84 @@ button:hover {
 }
 
 
+@media (max-width: 768px) {
+    .navbar {
+        padding: 10px 0;
+    }
 
+    .navbar li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    .navbar a {
+        font-size: 16px;
+    }
+
+    .weather-card {
+        padding: 15px;
+        width: 90%;
+        max-width: none;
+        margin: 10px;
+    }
+
+    .weather-card h3 {
+        font-size: 20px;
+    }
+
+    .weather-card p {
+        font-size: 14px;
+    }
+
+    .forecast-section {
+        margin-top: 10px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea,
+    select,
+    button {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    footer {
+        padding: 15px;
+        height: auto;
+        text-align: center;
+    }
+
+    .footer-links {
+        text-align: center;
+    }
+
+    .footer-links li {
+        display: inline-block;
+        margin: 5px;
+    }
+
+    .no-weather {
+        font-size: 16px;
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-card {
+        padding: 10px;
+        width: 100%;
+    }
+
+    .navbar a {
+        font-size: 14px;
+    }
+
+    footer {
+        padding: 10px;
+    }
+
+    .no-weather {
+        font-size: 14px;
+    }
+}

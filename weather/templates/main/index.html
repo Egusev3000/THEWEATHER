@@ -13,7 +13,7 @@
 
     <div class="main-search-section">
         <div class="container">
-            <div class="search-header">
+            <div class="search-header text-center">
                 <h1>Узнайте погоду в вашем городе</h1>
                 <p>С помощью нашего сервиса вы всегда будете в курсе погоды</p>
             </div>
@@ -67,7 +67,7 @@
                 .then(data => {
                     if (data.weather_data) {
                         document.getElementById('weatherCard').innerHTML = `
-                            <div class="col-md-6">
+                            <div class="col-md-6 col-sm-12">
                                 <div class="weather-card">
                                     <h3>${data.weather_data.city}</h3>
                                     <p>Температура: ${data.weather_data.temperature}°C</p>
@@ -91,7 +91,7 @@
 
                         forecast.forEach(day => {
                             forecastHTML += `
-                                <div class="col-md-4">
+                                <div class="col-md-4 col-sm-12">
                                     <div class="weather-card">
                                         <h4>${day.date}</h4>
                                         <p>Макс. температура: ${day.temperature_max}°C</p>
