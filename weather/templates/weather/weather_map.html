@@ -19,7 +19,7 @@
     <script>
         function init() {
             var myMap = new ymaps.Map("map", {
-                center: [55.751244, 37.618423], // Координаты Москвы по умолчанию
+                center: [55.751244, 37.618423],
                 zoom: 5
             });
 
@@ -40,18 +40,15 @@
     <div class="container mt-4">
         <h1 class="text-center">Карта погоды</h1>
 
-        <!-- Форма для ввода города -->
         <form method="post" class="mb-4">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="id_city" class="form-label">Введите название города:</label>
-                {{ form.city }}  <!-- Поле ввода для города -->
+                {{ form.city }}
             </div>
             <button type="submit" class="btn btn-primary">Показать погоду</button>
         </form>
 
-
-        <!-- Карта -->
         <div id="map" style="width: 100%; height: 500px;"></div>
     </div>
 
