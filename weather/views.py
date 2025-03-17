@@ -43,9 +43,9 @@ def weather_forecast(request):
         # Логируем все данные, которые пришли с API
         print(f"Данные с API: {data}")
 
-        # Проверяем, есть ли прогноз
-        if "forecast" not in data:
-            return JsonResponse({"error": "Прогноз недоступен для этого города."}, status=400)
+        # Проверяем наличие необходимых данных
+        if "location" not in data or "current" not in data or "forecast" not in data:
+            return JsonResponse({"error": "Некорректные данные от API."}, status=400)
 
         weather_data = {
             "city": data["location"]["name"],
@@ -69,6 +69,12 @@ def weather_forecast(request):
             'forecast_data': forecast_data
         })
 
+    except requests.exceptions.Timeout:
+        return JsonResponse({"error": "Запрос к API превысил время ожидания."}, status=504)
+    except requests.exceptions.ConnectionError:
+        return JsonResponse({"error": "Ошибка соединения с API."}, status=503)
+    except requests.exceptions.HTTPError as http_err:
+        return JsonResponse({"error": f"HTTP ошибка: {str(http_err)}"}, status=500)
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": f"Ошибка запроса: {str(e)}"}, status=500)
 
