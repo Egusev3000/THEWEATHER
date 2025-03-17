@@ -1,0 +1,63 @@
+{% extends "main/index.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Погода в {{ weather_data.city }}</h2>
+
+    <div class="search-box">
+        <form id="cityForm" class="search-form" method="GET" action="{% url 'weather_forecast' %}">
+            <div class="input-group">
+                <input id="cityInput" type="text" class="form-control" name="city" placeholder="Введите город" value="{{ request.GET.city }}" required>
+                <button type="submit" class="btn btn-primary">Узнать погоду</button>
+            </div>
+        </form>
+    </div>
+
+    {% if weather_data %}
+    <div id="weatherCard" class="weather-card mt-4">
+        <p>Температура: <span id="temperature">{{ weather_data.temperature }}</span>°C</p>
+        <p>Состояние: <span id="condition">{{ weather_data.condition }}</span></p>
+        <p>Влажность: <span id="humidity">{{ weather_data.humidity }}</span>%</p>
+        <p>Ветер: <span id="wind_speed">{{ weather_data.wind_speed }}</span> км/ч</p>
+    </div>
+    {% else %}
+    <div id="errorMessage" class="text-center text-danger mt-3">
+        {{ error }}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('cityForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Отменяем стандартную отправку формы
+
+        let city = document.getElementById('cityInput').value.trim();
+
+        if (city === '') {
+            document.getElementById('errorMessage').innerText = "Пожалуйста, введите название города!";
+            return;
+        }
+
+        fetch(`/weather-forecast/?city=${city}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.weather_data) {
+                    document.getElementById('temperature').innerText = data.weather_data.temperature;
+                    document.getElementById('condition').innerText = data.weather_data.condition;
+                    document.getElementById('humidity').innerText = data.weather_data.humidity;
+                    document.getElementById('wind_speed').innerText = data.weather_data.wind_speed;
+                    document.getElementById('errorMessage').innerText = ''; // Убираем сообщение об ошибке
+                } else {
+                    document.getElementById('errorMessage').innerText = "Не удалось получить данные о погоде.";
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при запросе данных:', error);
+                document.getElementById('errorMessage').innerText = "Ошибка запроса данных.";
+            });
+    });
+</script>
+
+{% endblock %}
+
+

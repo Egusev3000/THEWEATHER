@@ -19,13 +19,10 @@
             </div>
 
             <div class="search-box">
-                <form class="search-form" method="GET" action="{% url 'weather_forecast' %}">
+                <form id="cityForm" class="search-form">
                     <div class="input-group">
-                        <input style="border-radius: 8px;" type="text"
-                               class="form-control"
-                               name="city"
-                               placeholder="Введите город">
-                        <button class="btn btn-primary" style="border-radius: 8px;">Узнать погоду</button>
+                        <input id="cityInput" type="text" class="form-control" name="city" placeholder="Введите город">
+                        <button id="submitButton" class="btn btn-primary">Узнать погоду</button>
                     </div>
                 </form>
             </div>
@@ -33,45 +30,105 @@
     </div>
 
     <div class="container mt-5">
-        <section class="weather-section mb-5">
+        <section class="weather-section mb-5" id="weatherSection">
             <h2 class="section-title">Текущая погода</h2>
-            <div class="row g-4">
-                {% if weather_data %}
-                <div class="col-md-6">
-                    <div class="weather-card">
-                        <h3>{{ weather_data.city }}</h3>
-                        <p>Температура: {{ weather_data.temperature }}°C</p>
-                        <p>Состояние: {{ weather_data.condition }}</p>
-                        <p>Влажность: {{ weather_data.humidity }}%</p>
-                        <p>Ветер: {{ weather_data.wind_speed }} м/с</p>
-                    </div>
-                </div>
-                {% else %}
-                <div class="col-md-12">
-                    <h3 class="no-weather">Пожалуйста, введите город для получения данных о погоде.</h3>
-                </div>
-                {% endif %}
+            <div class="row g-4" id="weatherCard">
+                <!-- Погода будет вставляться сюда -->
             </div>
         </section>
 
         <section class="forecast-section mb-5">
-            <h2 class="section-title">Прогноз погоды на 5 дней</h2>
-            <div class="row g-4">
-                {% for day in forecast %}
-                <div class="col-md-2">
-                    <div class="forecast-card">
-                        <h4>{{ day.date }}</h4>
-                        <p>Температура: {{ day.temperature }}°C</p>
-                        <p>Состояние: {{ day.condition }}</p>
-                    </div>
+            <h2 class="section-title">Прогноз погоды на 3 дня</h2>
+            <div class="row g-4" id="forecastCard">
+                <!-- Прогноз будет вставляться сюда -->
+                <div class="col-md-12">
+                    <h3 class="no-forecast">Пожалуйста, введите город для получения прогноза.</h3>
                 </div>
-                {% endfor %}
             </div>
         </section>
     </div>
 
     {% include "main/footer.html" %}
 
+    <script>
+        document.getElementById('cityForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let city = document.getElementById('cityInput').value.trim();
+            console.log(`Отправляем запрос на город: ${city}`);  // Отладочный вывод
+
+            if (!city) {
+                alert("Пожалуйста, введите название города!");
+                return;
+            }
+
+            fetch(`/weather-forecast/?city=${city}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Обновление текущей погоды
+                    if (data.weather_data) {
+                        document.getElementById('weatherCard').innerHTML = `
+                            <div class="col-md-6">
+                                <div class="weather-card">
+                                    <h3>${data.weather_data.city}</h3>
+                                    <p>Температура: ${data.weather_data.temperature}°C</p>
+                                    <p>Состояние: ${data.weather_data.condition}</p>
+                                    <p>Влажность: ${data.weather_data.humidity}%</p>
+                                    <p>Ветер: ${data.weather_data.wind_speed} км/ч</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('weatherCard').innerHTML = `
+                            <div class="col-md-12">
+                                <h3 class="no-weather">${data.error || 'Произошла ошибка при запросе данных о погоде.'}</h3>
+                            </div>
+                        `;
+                    }
+
+                    // Обновление прогноза погоды
+                    if (data.forecast_data) {
+                        let forecastHTML = '';
+                        let forecast = data.forecast_data.slice(0, 3);  // Ограничиваем вывод 3 днями
+
+                        forecast.forEach(day => {
+                            forecastHTML += `
+                                <div class="col-md-4">
+                                    <div class="weather-card">
+                                        <h4>${day.date}</h4>
+                                        <p>Макс. температура: ${day.temperature_max}°C</p>
+                                        <p>Мин. температура: ${day.temperature_min}°C</p>
+                                        <p>Состояние: ${day.condition}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        // Добавляем прогноз в соответствующую секцию
+                        document.querySelector('.forecast-section .row').innerHTML = forecastHTML;
+                    } else {
+                        document.getElementById('forecastCard').innerHTML = `
+                            <div class="col-md-12">
+                                <h3 class="no-forecast">${data.error || 'Произошла ошибка при запросе прогноза погоды.'}</h3>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка запроса:', error);
+                    document.getElementById('weatherCard').innerHTML = `
+                        <div class="col-md-12">
+                            <h3 class="no-weather">Произошла ошибка при запросе данных о погоде.</h3>
+                        </div>
+                    `;
+                    document.getElementById('forecastCard').innerHTML = `
+                        <div class="col-md-12">
+                            <h3 class="no-forecast">Произошла ошибка при запросе прогноза погоды.</h3>
+                        </div>
+                    `;
+                });
+        });
+    </script>
     <link rel="stylesheet" href="{% static 'css/main/index.css' %}">
     <link rel="stylesheet" href="{% static 'css/weather/weather_card.css' %}">
 </body>

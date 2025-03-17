@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-ebi4d4lm4dd+5!z8f+b7^8*!^gfsxvmv(!t^z+4f#s)1dyhg(r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.88.253', 'localhost', '127.0.0.1', 'your-domain.com', '95.24.68.27',]
 
 
 # Application definition
@@ -119,3 +119,7 @@ STATICFILES_DIRS = (
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+WEATHERAPI_KEY = "8bb16c88475f4473a33171152242610"
+
+

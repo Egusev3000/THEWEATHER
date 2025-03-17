@@ -1,0 +1,60 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта погоды</title>
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/weather/weather_map.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=8054ab44-a088-439e-8712-9e27020e6650"></script>
+
+
+
+    <script>
+        function init() {
+            var myMap = new ymaps.Map("map", {
+                center: [55.751244, 37.618423], // Координаты Москвы по умолчанию
+                zoom: 5
+            });
+
+            {% if weather %}
+                var placemark = new ymaps.Placemark([{{ weather.coord.lat }}, {{ weather.coord.lon }}], {
+                    balloonContent: "Температура: {{ weather.main.temp }}°C, {{ weather.weather.0.description }}"
+                });
+                myMap.geoObjects.add(placemark);
+                myMap.setCenter([{{ weather.coord.lat }} , {{ weather.coord.lon }}], 10);
+            {% endif %}
+        }
+        ymaps.ready(init);
+    </script>
+</head>
+<body class="weather-map-body">
+    {% include "main/menu.html" %}
+
+    <div class="container mt-4">
+        <h1 class="text-center">Карта погоды</h1>
+
+        <!-- Форма для ввода города -->
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_city" class="form-label">Введите название города:</label>
+                {{ form.city }}  <!-- Поле ввода для города -->
+            </div>
+            <button type="submit" class="btn btn-primary">Показать погоду</button>
+        </form>
+
+
+        <!-- Карта -->
+        <div id="map" style="width: 100%; height: 500px;"></div>
+    </div>
+
+    {% include "main/footer.html" %}
+</body>
+</html>
