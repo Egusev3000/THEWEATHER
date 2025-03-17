@@ -65,7 +65,6 @@
             fetch(`/weather-forecast/?city=${city}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Обновление текущей погоды
                     if (data.weather_data) {
                         document.getElementById('weatherCard').innerHTML = `
                             <div class="col-md-6">
@@ -86,7 +85,6 @@
                         `;
                     }
 
-                    // Обновление прогноза погоды
                     if (data.forecast_data) {
                         let forecastHTML = '';
                         let forecast = data.forecast_data.slice(0, 3);  // Ограничиваем вывод 3 днями
@@ -104,7 +102,6 @@
                             `;
                         });
 
-                        // Добавляем прогноз в соответствующую секцию
                         document.querySelector('.forecast-section .row').innerHTML = forecastHTML;
                     } else {
                         document.getElementById('forecastCard').innerHTML = `

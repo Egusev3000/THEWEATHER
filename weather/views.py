@@ -3,7 +3,6 @@ import requests
 from django import forms
 from django.conf import settings
 from django.http import JsonResponse
-import json
 
 
 class CityForm(forms.Form):
@@ -32,18 +31,16 @@ def weather_forecast(request):
     if not city:
         return JsonResponse({"error": "Введите название города!"}, status=400)
 
-    api_key = settings.WEATHERAPI_KEY  # API-ключ из settings.py
+    api_key = settings.WEATHERAPI_KEY
     url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={city}&days=3&lang=ru"
 
     try:
-        response = requests.get(url, timeout=5)  # Добавляем таймаут
-        response.raise_for_status()  # Проверяем наличие HTTP-ошибок
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
         data = response.json()
 
-        # Логируем все данные, которые пришли с API
         print(f"Данные с API: {data}")
 
-        # Проверяем наличие необходимых данных
         if "location" not in data or "current" not in data or "forecast" not in data:
             return JsonResponse({"error": "Некорректные данные от API."}, status=400)
 
@@ -79,27 +76,25 @@ def weather_forecast(request):
         return JsonResponse({"error": f"Ошибка запроса: {str(e)}"}, status=500)
 
 
-
-
-
 def home(req):
     return render(req, 'main/index.html')
 
+
 def weather_map(request):
-    return render(request, 'weather/weather_map.html')  # Шаблон для карты погоды
+    return render(request, 'weather/weather_map.html')
 
 
 def about(request):
-    return render(request, 'weather/about.html')  # Шаблон для страницы "О нас"
+    return render(request, 'weather/about.html')
 
 
 def contact(request):
-    return render(request, 'weather/contact.html')  # Шаблон для страницы "Контакты"
+    return render(request, 'weather/contact.html')
 
 
 def privacy_policy(request):
-    return render(request, 'weather/privacy_policy.html')  # Шаблон для страницы "Политика конфиденциальности"
+    return render(request, 'weather/privacy_policy.html')
 
 
 def terms_of_service(request):
-    return render(request, 'weather/terms_of_service.html')  # Шаблон для страницы "Условия использования"4
+    return render(request, 'weather/terms_of_service.html')
