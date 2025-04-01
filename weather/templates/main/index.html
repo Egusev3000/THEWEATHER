@@ -52,79 +52,82 @@
 
     <script>
         document.getElementById('cityForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+          event.preventDefault();
+      
+          let city = document.getElementById('cityInput').value.trim();
+          console.log(`Отправляем запрос на город: ${city}`);  // Отладочный вывод
+      
+          if (!city) {
+              alert("Пожалуйста, введите название города!");
+              return;
+          }
+      
+          fetch(`/weather-forecast/?city=${city}`)
+              .then(response => response.json())
+              .then(data => {
+                  if (data.weather_data) {
+                      document.getElementById('weatherCard').innerHTML = `
+                          <div class="col-md-6 col-sm-12">
+                              <div class="weather-card">
+                                  <h3>${data.weather_data.city}</h3>
+                                  <p>Температура: ${data.weather_data.temperature}°C</p>
+                                  <p>Состояние: ${data.weather_data.condition}</p>
+                                  <p>Влажность: ${data.weather_data.humidity}%</p>
+                                  <p>Ветер: ${data.weather_data.wind_speed} км/ч</p>
+                                  <p><strong>Индекс комфорта: ${data.weather_data.comfort_index}/100</strong></p>
+                              </div>
+                          </div>
+                      `;
+                  } else {
+                      document.getElementById('weatherCard').innerHTML = `
+                          <div class="col-md-12">
+                              <h3 class="no-weather">${data.error || 'Произошла ошибка при запросе данных о погоде.'}</h3>
+                          </div>
+                      `;
+                  }
+      
+                  if (data.forecast_data) {
+                      let forecastHTML = '';
+                      let forecast = data.forecast_data.slice(0, 3);  // Ограничиваем вывод 3 днями
+      
+                      forecast.forEach(day => {
+                          forecastHTML += `
+                              <div class="col-md-4 col-sm-12">
+                                  <div class="weather-card">
+                                      <h4>${day.date}</h4>
+                                      <p>Макс. температура: ${day.temperature_max}°C</p>
+                                      <p>Мин. температура: ${day.temperature_min}°C</p>
+                                      <p>Состояние: ${day.condition}</p>
+                                      <p><strong>Индекс комфорта: ${day.comfort_index}/100</strong></p>
+                                  </div>
+                              </div>
+                          `;
+                      });
+      
+                      document.querySelector('.forecast-section .row').innerHTML = forecastHTML;
+                  } else {
+                      document.getElementById('forecastCard').innerHTML = `
+                          <div class="col-md-12">
+                              <h3 class="no-forecast">${data.error || 'Произошла ошибка при запросе прогноза погоды.'}</h3>
+                          </div>
+                      `;
+                  }
+              })
+              .catch(error => {
+                  console.error('Ошибка запроса:', error);
+                  document.getElementById('weatherCard').innerHTML = `
+                      <div class="col-md-12">
+                          <h3 class="no-weather">Произошла ошибка при запросе данных о погоде.</h3>
+                      </div>
+                  `;
+                  document.getElementById('forecastCard').innerHTML = `
+                      <div class="col-md-12">
+                          <h3 class="no-forecast">Произошла ошибка при запросе прогноза погоды.</h3>
+                      </div>
+                  `;
+              });
+      });
 
-            let city = document.getElementById('cityInput').value.trim();
-            console.log(`Отправляем запрос на город: ${city}`);  // Отладочный вывод
-
-            if (!city) {
-                alert("Пожалуйста, введите название города!");
-                return;
-            }
-
-            fetch(`/weather-forecast/?city=${city}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.weather_data) {
-                        document.getElementById('weatherCard').innerHTML = `
-                            <div class="col-md-6 col-sm-12">
-                                <div class="weather-card">
-                                    <h3>${data.weather_data.city}</h3>
-                                    <p>Температура: ${data.weather_data.temperature}°C</p>
-                                    <p>Состояние: ${data.weather_data.condition}</p>
-                                    <p>Влажность: ${data.weather_data.humidity}%</p>
-                                    <p>Ветер: ${data.weather_data.wind_speed} км/ч</p>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        document.getElementById('weatherCard').innerHTML = `
-                            <div class="col-md-12">
-                                <h3 class="no-weather">${data.error || 'Произошла ошибка при запросе данных о погоде.'}</h3>
-                            </div>
-                        `;
-                    }
-
-                    if (data.forecast_data) {
-                        let forecastHTML = '';
-                        let forecast = data.forecast_data.slice(0, 3);  // Ограничиваем вывод 3 днями
-
-                        forecast.forEach(day => {
-                            forecastHTML += `
-                                <div class="col-md-4 col-sm-12">
-                                    <div class="weather-card">
-                                        <h4>${day.date}</h4>
-                                        <p>Макс. температура: ${day.temperature_max}°C</p>
-                                        <p>Мин. температура: ${day.temperature_min}°C</p>
-                                        <p>Состояние: ${day.condition}</p>
-                                    </div>
-                                </div>
-                            `;
-                        });
-
-                        document.querySelector('.forecast-section .row').innerHTML = forecastHTML;
-                    } else {
-                        document.getElementById('forecastCard').innerHTML = `
-                            <div class="col-md-12">
-                                <h3 class="no-forecast">${data.error || 'Произошла ошибка при запросе прогноза погоды.'}</h3>
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка запроса:', error);
-                    document.getElementById('weatherCard').innerHTML = `
-                        <div class="col-md-12">
-                            <h3 class="no-weather">Произошла ошибка при запросе данных о погоде.</h3>
-                        </div>
-                    `;
-                    document.getElementById('forecastCard').innerHTML = `
-                        <div class="col-md-12">
-                            <h3 class="no-forecast">Произошла ошибка при запросе прогноза погоды.</h3>
-                        </div>
-                    `;
-                });
-        });
     </script>
     <link rel="stylesheet" href="{% static 'css/main/index.css' %}">
     <link rel="stylesheet" href="{% static 'css/weather/weather_card.css' %}">
