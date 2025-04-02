@@ -75,7 +75,7 @@
                                     <p>Влажность: ${data.weather_data.humidity}%</p>
                                     <p>Ветер: ${data.weather_data.wind_speed} км/ч</p>
                                     <p>
-                                        <span class="info-tooltip" title="Индекс комфорта показывает субъективную оценку погоды на основе температуры, влажности и ветра.">?</span>
+                                        <span class="info-tooltip">?</span>
                                         <strong>Индекс комфорта: ${data.weather_data.comfort_index}/100</strong>
                                     </p>
                                     <div class="feedback-buttons">
@@ -106,7 +106,7 @@
                                         <p>Мин. температура: ${day.temperature_min}°C</p>
                                         <p>Состояние: ${day.condition}</p>
                                         <p>
-                                            <span class="info-tooltip" title="Индекс комфорта показывает субъективную оценку погоды на основе температуры, влажности и ветра.">?</span>
+                                            <span class="info-tooltip">?</span>
                                             <strong>Индекс комфорта: ${day.comfort_index}/100</strong>
                                         </p>
                                     </div>
@@ -165,20 +165,27 @@
         position: relative;
     }
 
-    .info-tooltip:hover::after {
-        content: attr(title);
+    .info-tooltip::after {
+        content: "Индекс комфорта показывает субъективную оценку погоды на основе температуры, влажности и ветра.";
         position: absolute;
-        left: -100%;
-        transform: translateX(-10%);
+        left: 50%;
         bottom: 150%;
+        transform: translateX(-50%);
         background-color: white;
         color: black;
         padding: 5px 10px;
         border-radius: 5px;
         border: 1px solid black;
-        white-space: nowrap;
+        white-space: normal;
         font-size: 12px;
         box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+        width: 200px;
+        text-align: center;
+        display: none;
+    }
+
+    .info-tooltip:hover::after {
+        display: block;
     }
 
     .feedback-buttons {
