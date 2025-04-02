@@ -162,3 +162,73 @@ def privacy_policy(request):
 
 def terms_of_service(request):
     return render(request, 'weather/terms_of_service.html')
+
+def weather_by_coords(request):
+    lat = request.GET.get('lat', '').strip()
+    lon = request.GET.get('lon', '').strip()
+
+    if not lat or not lon:
+        return render(request, 'error.html', {'error': "Координаты не указаны!"})
+
+    try:
+        # API для получения прогноза по координатам
+        api_key = settings.WEATHERAPI_KEY
+        url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={lat},{lon}&days=3&lang=ru"
+
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        if "location" not in data or "current" not in data or "forecast" not in data:
+            return render(request, 'error.html', {'error': "Некорректные данные от API."})
+
+        # Получаем текущую погоду
+        current_temp = data["current"]["temp_c"]
+        current_humidity = data["current"]["humidity"]
+        current_wind_speed = data["current"]["wind_kph"]
+        current_precipitation = data["current"].get("precip_mm", 0)
+
+        current_comfort_index = calculate_comfort_index(current_temp, current_humidity, current_wind_speed, current_precipitation)
+
+        weather_data = {
+            "city": data["location"]["name"],
+            "temperature": current_temp,
+            "condition": data["current"]["condition"]["text"],
+            "humidity": current_humidity,
+            "wind_speed": current_wind_speed,
+            "comfort_index": current_comfort_index
+        }
+
+        # Прогноз на несколько дней
+        forecast_data = []
+
+        # Проходимся по каждому дню прогноза и рассчитываем индекс комфорта
+        for day in data["forecast"]["forecastday"]:
+            avg_temp = (day["day"]["maxtemp_c"] + day["day"]["mintemp_c"]) / 2
+            avg_humidity = day["day"]["avghumidity"]
+            max_wind_speed = day["day"]["maxwind_kph"]
+            total_precipitation = day["day"].get("totalprecip_mm", 0)
+
+            comfort_index = calculate_comfort_index(avg_temp, avg_humidity, max_wind_speed, total_precipitation)
+
+            forecast_data.append({
+                "date": day["date"],
+                "temperature_max": day["day"]["maxtemp_c"],
+                "temperature_min": day["day"]["mintemp_c"],
+                "condition": day["day"]["condition"]["text"],
+                "comfort_index": comfort_index
+            })
+
+        return render(request, 'weather/weather_by_coords.html', {
+            'weather': weather_data,
+            'forecast_data': forecast_data
+        })
+
+    except requests.exceptions.Timeout:
+        return render(request, 'error.html', {'error': "Запрос к API превысил время ожидания."})
+    except requests.exceptions.ConnectionError:
+        return render(request, 'error.html', {'error': "Ошибка соединения с API."})
+    except requests.exceptions.HTTPError as http_err:
+        return render(request, 'error.html', {'error': f"HTTP ошибка: {str(http_err)}"})
+    except requests.exceptions.RequestException as e:
+        return render(request, 'error.html', {'error': f"Ошибка запроса: {str(e)}"})

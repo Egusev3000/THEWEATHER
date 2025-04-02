@@ -12,4 +12,5 @@ urlpatterns = [
     path('terms-of-service/', terms_of_service, name='terms_of_service'),
     path("weather-map/", weather_map, name="weather_map"),
     path('weather-forecast/', weather_forecast, name='weather_forecast'),
+    path('weather-by-coords/', weather_by_coords, name='weather_by_coords'),
 ]

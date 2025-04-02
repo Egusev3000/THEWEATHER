@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Погода по координатам</title>
+    <!-- Подключаем ваши стили -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="index-body">
+    {% include "main/menu.html" %}
+
+    <div class="main-search-section">
+        <div class="container">
+            <div class="search-header text-center">
+                <h1>Погода для выбранных координат</h1>
+                <p>Вы узнали погоду по указанным вами координатам</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <!-- Текущая погода -->
+        <section class="weather-section mb-5" id="weatherSection">
+            <h2 class="section-title">Текущая погода</h2>
+            <div class="row g-4" id="weatherCard">
+                <div class="col-md-6 col-sm-12">
+                    <div class="weather-card">
+                        <h3>{{ weather.city }}</h3>
+                        <p>Температура: {{ weather.temperature }}°C</p>
+                        <p>Состояние: {{ weather.condition }}</p>
+                        <p>Влажность: {{ weather.humidity }}%</p>
+                        <p>Ветер: {{ weather.wind_speed }} км/ч</p>
+                        <p>
+                            <span class="info-tooltip">?</span>
+                            <strong>Индекс комфорта: {{ weather.comfort_index }}/100</strong>
+                        </p>
+                        <div class="feedback-buttons">
+                            <button class="btn-feedback" onclick="sendFeedback('${data.weather_data.city}', true)">👍</button>
+                            <button class="btn-feedback" onclick="sendFeedback('${data.weather_data.city}', false)">👎</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Прогноз на 3 дня -->
+        <section class="forecast-section mb-5">
+            <h2 class="section-title">Прогноз погоды на 3 дня</h2>
+            <div class="row g-4" id="forecastCard">
+                {% for day in forecast_data %}
+                    <div class="col-md-4 col-sm-12">
+                        <div class="weather-card">
+                            <h4>{{ day.date }}</h4>
+                            <p>Макс. температура: {{ day.temperature_max }}°C</p>
+                            <p>Мин. температура: {{ day.temperature_min }}°C</p>
+                            <p>Состояние: {{ day.condition }}</p>
+                            <p>
+                                <span class="info-tooltip">?</span>
+                                <strong>Индекс комфорта: {{ day.comfort_index }}/100</strong>
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if forecast_data|length == 0 %}
+                    <div class="col-md-12">
+                        <h3 class="no-forecast">Прогноз на 3 дня не доступен.</h3>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <a href="/weather-map/" class="btn btn-primary">Назад на карту</a>
+    </div>
+    <link rel="stylesheet" href="{% static 'css/main/index.css' %}">
+    <link rel="stylesheet" href="{% static 'css/weather/weather_card.css' %}">
+
+    {% include "main/footer.html" %}
+
+    <script>
+        function sendFeedback(city, isCorrect) {
+            console.log(`Отзыв о погоде в городе ${city}: ${isCorrect ? 'Совпадает' : 'Не совпадает'}`);
+            alert(`Вы отправили отзыв о погоде в городе ${city}: ${isCorrect ? 'Совпадает' : 'Не совпадает'}`);
+        }
+    </script>
+</body>
+</html>
+
+<style>
+    .info-tooltip {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        text-align: center;
+        border-radius: 50%;
+        background-color: #3498db;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-right: 5px;
+        position: relative;
+    }
+
+    .info-tooltip::after {
+        content: "Индекс комфорта показывает субъективную оценку погоды на основе температуры, влажности и ветра.";
+        position: absolute;
+        left: 50%;
+        bottom: 150%;
+        transform: translateX(-50%);
+        background-color: white;
+        color: black;
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: 1px solid black;
+        white-space: normal;
+        font-size: 12px;
+        box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+        width: 200px;
+        text-align: center;
+        display: none;
+    }
+
+    .info-tooltip:hover::after {
+        display: block;
+    }
+
+    .feedback-buttons {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-feedback {
+        font-size: 20px;
+        background: none;
+        border: 2px solid white;
+        border-radius: 5px;
+        color: white;
+        padding: 5px 15px;
+        cursor: pointer;
+    }
+</style>
