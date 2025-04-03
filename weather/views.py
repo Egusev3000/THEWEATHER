@@ -63,19 +63,25 @@ def calculate_comfort_index(temp, humidity, wind, precipitation):
 
     return max(0, min(comfort, 100))  # Ограничиваем от 0 до 100
 
+
 def weather_forecast(request):
     city = request.GET.get('city', '').strip()
     
     if not city:
         return JsonResponse({"error": "Введите название города!"}, status=400)
 
+    # Очистка названия города от лишних символов
     city = re.sub(r"[^А-Яа-яЁё\-\s]", "", city).capitalize()
+
+    # Обработка городов с несколькими словами
     multi_word_cities = ["Санкт-Петербург", "Нижний Новгород", "Ростов-на-Дону", "Йошкар-Ола"]
     city = next((mwc for mwc in multi_word_cities if city.lower() == mwc.lower()), city.title())
 
+    # Коррекция названий
     city_corrections = {"Щелково": "Щёлково", "Семенов": "Семёнов", "Тетюши": "Тётюши"}
     city = city_corrections.get(city, city)
 
+    # Специальный случай для Щёлково
     is_schelkovo = (city == "Щёлково")
     location_param = "55.92366755925711,37.99806848377064" if is_schelkovo else city
 
@@ -87,16 +93,19 @@ def weather_forecast(request):
         response.raise_for_status()
         data = response.json()
 
+        # Проверка, что в ответе есть нужные данные
         if "location" not in data or "current" not in data or "forecast" not in data:
-            return JsonResponse({"error": "Некорректные данные от API."}, status=400)
+            return JsonResponse({"error": "Такого населённого пункта, скорее всего, не существует."}, status=404)
 
-        # Получаем данные о текущей погоде
-        current_temp = data["current"]["temp_c"]
-        current_humidity = data["current"]["humidity"]
-        current_wind_speed = data["current"]["wind_kph"]
+        # Получаем текущую погоду
+        current_temp = data["current"].get("temp_c")
+        current_humidity = data["current"].get("humidity")
+        current_wind_speed = data["current"].get("wind_kph", 0)
         current_precipitation = data["current"].get("precip_mm", 0)
 
-        current_comfort_index = calculate_comfort_index(current_temp, current_humidity, current_wind_speed, current_precipitation)
+        current_comfort_index = calculate_comfort_index(
+            current_temp, current_humidity, current_wind_speed, current_precipitation
+        )
 
         weather_data = {
             "city": "Щёлково" if is_schelkovo else data["location"]["name"],
@@ -108,15 +117,15 @@ def weather_forecast(request):
         }
 
         forecast_data = []
-
-        # Проходимся по каждому дню прогноза и рассчитываем индекс комфорта
         for day in data["forecast"]["forecastday"]:
             avg_temp = (day["day"]["maxtemp_c"] + day["day"]["mintemp_c"]) / 2
             avg_humidity = day["day"]["avghumidity"]
             max_wind_speed = day["day"]["maxwind_kph"]
             total_precipitation = day["day"].get("totalprecip_mm", 0)
 
-            comfort_index = calculate_comfort_index(avg_temp, avg_humidity, max_wind_speed, total_precipitation)
+            comfort_index = calculate_comfort_index(
+                avg_temp, avg_humidity, max_wind_speed, total_precipitation
+            )
 
             forecast_data.append({
                 "date": day["date"],
@@ -133,9 +142,13 @@ def weather_forecast(request):
     except requests.exceptions.ConnectionError:
         return JsonResponse({"error": "Ошибка соединения с API."}, status=503)
     except requests.exceptions.HTTPError as http_err:
+        if response.status_code == 400:
+            return JsonResponse({"error": "Такого населённого пункта, скорее всего, не существует."}, status=404)
         return JsonResponse({"error": f"HTTP ошибка: {str(http_err)}"}, status=500)
-    except requests.exceptions.RequestException as e:
-        return JsonResponse({"error": f"Ошибка запроса: {str(e)}"}, status=500)
+    except requests.exceptions.RequestException:
+        return JsonResponse({"error": "Произошла ошибка при получении данных о погоде."}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": f"Непредвиденная ошибка: {str(e)}"}, status=500)
 
 
 
