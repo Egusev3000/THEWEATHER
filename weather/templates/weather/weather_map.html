@@ -81,13 +81,15 @@
             </div>
             <input type="hidden" id="lat" name="lat">
             <input type="hidden" id="lon" name="lon">
+            <div id="weatherCard"></div>
+
+            <div id="map" style="width: 100%; height: 500px;"></div>
             <button type="submit" class="btn btn-primary">Показать погоду по координатам</button>
         </form>
 
-        <div id="weatherCard"></div>
-
-        <div id="map" style="width: 100%; height: 500px;"></div>
+        
     </div>
+    
 
     {% include "main/footer.html" %}
 </body>
